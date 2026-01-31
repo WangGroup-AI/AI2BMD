@@ -26,22 +26,29 @@ class DLBondedCalculator:
         self,
         ckpt_path: str,
         ckpt_type: str,
+        pima_mode: bool,
         **kwargs,
     ) -> None:
         self.models: list[ViSNetModelLike] = []
         self.ckpt_path = ckpt_path
         self.ckpt_type = ckpt_type
+        self.pima_mode = pima_mode
 
         # * set fragment method and combiner
         self.fragment_method = DistanceFragment()
         self.combiner = DipeptideBondedCombiner()
 
         print("Loading models...")
-        model_path = osp.join(self.ckpt_path, f"visnet-uni-{self.ckpt_type}.ckpt")
-        self.models = [
-            get_visnet_model(model_path, device)
-            for device in DeviceStrategy.get_bonded_devices()
-        ]
+
+        if pima_mode:
+            from Calculators.visnet_calculator import ViSNetPIMACalculator        
+            self.models = [ViSNetPIMACalculator(ckpt_path=ckpt_path, is_root_calc=False)]
+        else:
+            model_path = osp.join(self.ckpt_path, f"visnet-uni-{self.ckpt_type}.ckpt")
+            self.models = [
+                get_visnet_model(model_path, device)
+                for device in DeviceStrategy.get_bonded_devices()
+            ]
 
     def _inference_impl(
         self, data: list[FragmentData], model: ViSNetModelLike

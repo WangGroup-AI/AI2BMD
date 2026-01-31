@@ -62,6 +62,7 @@ if __name__ == "__main__":
         ckpt_path=args.ckpt_path,
         ckpt_type=args.ckpt_type,
         nbcalc_type=args.fragment_longrange_calc,
+        pima_mode=args.pima_mode
     )
 
     simulator.simulate(

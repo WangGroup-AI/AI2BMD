@@ -133,6 +133,12 @@ def init(argv=None):
         """,
     )
     parser.add_argument(
+        "--pima-mode",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="visnet pima will be used.",
+    )
+    parser.add_argument(
         "--fragment-longrange-calc",
         type=str,
         default="mm",
@@ -210,6 +216,8 @@ def init(argv=None):
     os.makedirs(_args.log_dir, exist_ok=True)
     _args.base_dir = os.path.abspath(_args.base_dir)
     _args.log_dir = os.path.abspath(_args.log_dir)
+    if _args.pima_mode:
+        _args.ckpt_path = os.path.join(_src_dir, "ViSNet/checkpoints/visnet_pima_trained_on_8m_PUDP_200epoch.zip"),
     _args.ckpt_path = os.path.abspath(_args.ckpt_path)
     _args.prot_file = os.path.abspath(_args.prot_file)
     _args.utils_dir = os.path.join(_src_dir, "utils")

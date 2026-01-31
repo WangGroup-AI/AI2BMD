@@ -9,7 +9,7 @@ from typing import Union
 
 import numpy as np
 import torch
-from ase.calculators.calculator import Calculator
+from ase.calculators.calculator import Calculator, all_changes
 
 from AIMD import arguments
 from AIMD.fragment import FragmentData
@@ -154,6 +154,81 @@ class ViSNetCalculator(Calculator):
             "forces": f,
         }
 
+class ViSNetPIMACalculator(Calculator):
+    """
+    专门为 JAX/PIMA 模型设计的 ASE 计算器子类。
+    它伪装成 ViSNet 的接口，但内部完全运行 JAX 逻辑。
+    """
+    implemented_properties = ["energy", "forces"]
+
+    def __init__(self, ckpt_path: str, is_root_calc=True, **kwargs):
+        super().__init__(**kwargs)
+        self.is_root_calc = is_root_calc
+        
+        # 1. 彻底绕过 Torch，使用 MLIP 的原生 JAX 加载方式
+        from mlip.models import Visnet
+        from mlip.models.model_io import load_model_from_zip
+        from mlip.simulation.ase.mlip_ase_calculator import MLIPForceFieldASECalculator
+        from ase import Atoms
+
+        print(ckpt_path)
+        # 加载 JAX ForceField (这部分不涉及 Torch)
+        self.force_field = load_model_from_zip(Visnet, ckpt_path)
+        self.jax_engine = None  # 先不初始化
+
+    def calculate(self, atoms=None, properties=['energy', 'forces'], system_changes=all_changes):
+        """
+        这个方法解决了你的 AttributeError。
+        模拟器调用 self.qmcalc.calculate(...) 时会进入这里。
+        """
+        if self.is_root_calc:
+            Calculator.calculate(self, atoms, properties, system_changes)
+        
+        if self.jax_engine is None:
+            #print(f"Initializing JAX Engine with real fragment size: {len(atoms)} atoms")
+            from mlip.simulation.ase.mlip_ase_calculator import MLIPForceFieldASECalculator
+            self.jax_engine = MLIPForceFieldASECalculator(
+                atoms=atoms,  # 使用真实的第一个碎片进行初始化
+                force_field=self.force_field,
+                edge_capacity_multiplier=2.0, # 稍微给点余量
+                node_capacity_multiplier=2.0,
+                allow_nodes_to_change=True
+            )
+
+        # 3. 核心：调用 JAX 引擎进行计算
+        # 注意：这里直接把 atoms 传给内部的 jax_engine
+        self.jax_engine.calculate(atoms, properties=['energy', 'forces'], system_changes=all_changes)
+
+        # 4. 提取 JAX 结果并转回 Numpy (确保模拟器能识别)
+        # JAX 的 DeviceArray 需要转成 Numpy 以免后续 Torch 逻辑报错
+        self.results = {
+            "energy": np.array(self.jax_engine.results["energy"]).item(),
+            "forces": np.array(self.jax_engine.results["forces"]).astype(np.float64)
+        }
+        
+    def dl_potential_loader(self, data):
+        """
+        利用 FragmentData 内置方法确保 JAX 逐个处理碎片
+        """
+        import numpy as np
+        
+        # 情况 A: data 包含多个碎片 (一个 List 里的 partitions)
+        if hasattr(data, 'start') and len(data.start) > 1:
+            total_energy = []
+            all_forces = []
+            
+            for i in range(len(data)):
+                # 直接调用 FragmentData 自带的 get_atoms 获得标准的 ASE Atoms
+                tmp_atoms = data.get_atoms(i)
+                
+                # 执行 JAX 计算
+                self.calculate(tmp_atoms)
+                
+                total_energy.append(self.results["energy"])
+                all_forces.append(self.results["forces"])
+            
+            # 返回拼接后的能量（标量包装）和受力（长数组）
+            return np.array(total_energy), np.concatenate(all_forces, axis=0)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("ViSNet proxy")
@@ -177,7 +252,7 @@ if __name__ == "__main__":
     except Exception:
         exit(0)
 
-ViSNetModelLike = Union[ViSNetModel, ViSNetAsyncModel]
+ViSNetModelLike = Union[ViSNetModel, ViSNetAsyncModel, ViSNetPIMACalculator]
 _local_calc: dict[str, ViSNetModel] = {}
 
 
