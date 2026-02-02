@@ -130,7 +130,7 @@ class ProteinData(Data):
         return super().__inc__(key, value, *args, **kwargs)
 
 
-class ProteinDataBatch(Batch, ProteinData):
+class ProteinDataBatch(Batch):
     """
     Class representing a batch of protein structures as a graph.
     This class modifies the `get_example` method so that
@@ -160,7 +160,7 @@ class ProteinDataBatch(Batch, ProteinData):
             else {key: self._slice_dict[key] for key in keys}
         )
         data = separate.separate(
-            cls=self.__class__.__bases__[-1],
+            cls=ProteinData,
             batch=self,
             idx=idx,
             slice_dict=slice_dict,
