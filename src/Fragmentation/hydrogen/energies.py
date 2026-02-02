@@ -76,8 +76,8 @@ class HydrogenOptimizer:
         self, max_iter=5, scnb_scale_factor=1.2, scee_scale_factor=2.0
     ):
         self.max_iter = max_iter
-        self.scnb_scale_factor = scnb_scale_factor
-        self.scee_scale_factor = scee_scale_factor
+        self.scnb_scale_factor = torch.tensor(scnb_scale_factor)
+        self.scee_scale_factor = torch.tensor(scee_scale_factor)
 
     def get_bond_energy(self, batch: ProteinData):
         r"""

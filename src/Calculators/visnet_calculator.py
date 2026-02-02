@@ -84,6 +84,12 @@ class ViSNetAsyncModel:
         self.server = AsyncServer("ViSNet")
         self.logger = getLogger("ViSNet-Proxy")
         envs = os.environ.copy()
+        
+        try:
+            _ = envs["PYTHONPATH"]
+        except:
+            envs["PYTHONPATH"] = ""
+
         envs["PYTHONPATH"] = f"{osp.abspath(osp.join(osp.dirname(__file__), '..'))}:{envs['PYTHONPATH']}"
         outfd = None if arguments.get().verbose >= 3 else subprocess.DEVNULL
         # use __file__ as process so that viztracer-patched subprocess doesn't track us

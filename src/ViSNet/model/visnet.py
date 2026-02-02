@@ -89,7 +89,7 @@ def load_model(filepath, args=None, device="cpu", **kwargs):
     for p in model.parameters():
         p.requires_grad=False
 
-    model = torch.jit.script(model)
+    # model = torch.jit.script(model)
     return model.to(device)
 
 
