@@ -42,7 +42,10 @@ class DLBondedCalculator:
 
         if pima_mode:
             from Calculators.visnet_calculator import ViSNetPIMACalculator        
-            self.models = [ViSNetPIMACalculator(ckpt_path=ckpt_path, is_root_calc=False)]
+            self.models = [
+                ViSNetPIMACalculator(ckpt_path=ckpt_path, device=device, is_root_calc=False) 
+                for device in DeviceStrategy.get_bonded_devices()
+                ]
         else:
             model_path = osp.join(self.ckpt_path, f"visnet-uni-{self.ckpt_type}.ckpt")
             self.models = [
@@ -91,7 +94,6 @@ class DLBondedCalculator:
 
         # convert numpy arrays to torch tensors
         device = DeviceStrategy.get_default_device()
-
         energy = numpy_to_torch(energy, device=device)
         forces = numpy_to_torch(forces, device=device)
 

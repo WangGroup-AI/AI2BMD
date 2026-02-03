@@ -217,8 +217,12 @@ def init(argv=None):
     _args.base_dir = os.path.abspath(_args.base_dir)
     _args.log_dir = os.path.abspath(_args.log_dir)
     if _args.pima_mode:
-        _args.ckpt_path = os.path.join(_src_dir, "ViSNet/checkpoints/visnet_pima_trained_on_8m_PUDP_200epoch.zip"),
+        _args.ckpt_path = "./src/ViSNet/checkpoints/visnet_pima_trained_on_8m_PUDP_200epoch.zip"
     _args.ckpt_path = os.path.abspath(_args.ckpt_path)
+    """
+    if _args.pima_mode:
+        _args.ckpt_path = "./ViSNet/checkpoints/visnet_pima_trained_on_8m_PUDP_200epoch.zip"
+    """
     _args.prot_file = os.path.abspath(_args.prot_file)
     _args.utils_dir = os.path.join(_src_dir, "utils")
 

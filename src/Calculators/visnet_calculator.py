@@ -89,7 +89,7 @@ class ViSNetAsyncModel:
             _ = envs["PYTHONPATH"]
         except:
             envs["PYTHONPATH"] = ""
-
+        
         envs["PYTHONPATH"] = f"{osp.abspath(osp.join(osp.dirname(__file__), '..'))}:{envs['PYTHONPATH']}"
         outfd = None if arguments.get().verbose >= 3 else subprocess.DEVNULL
         # use __file__ as process so that viztracer-patched subprocess doesn't track us
@@ -167,15 +167,13 @@ class ViSNetPIMACalculator(Calculator):
     """
     implemented_properties = ["energy", "forces"]
 
-    def __init__(self, ckpt_path: str, is_root_calc=True, **kwargs):
+    def __init__(self, ckpt_path: str, device="cpu", is_root_calc=True, **kwargs):
         super().__init__(**kwargs)
         self.is_root_calc = is_root_calc
-        
+        self.device=device
         # 1. 彻底绕过 Torch，使用 MLIP 的原生 JAX 加载方式
         from mlip.models import Visnet
         from mlip.models.model_io import load_model_from_zip
-        from mlip.simulation.ase.mlip_ase_calculator import MLIPForceFieldASECalculator
-        from ase import Atoms
 
         print(ckpt_path)
         # 加载 JAX ForceField (这部分不涉及 Torch)
@@ -189,7 +187,7 @@ class ViSNetPIMACalculator(Calculator):
         """
         if self.is_root_calc:
             Calculator.calculate(self, atoms, properties, system_changes)
-        
+
         if self.jax_engine is None:
             #print(f"Initializing JAX Engine with real fragment size: {len(atoms)} atoms")
             from mlip.simulation.ase.mlip_ase_calculator import MLIPForceFieldASECalculator
@@ -222,7 +220,7 @@ class ViSNetPIMACalculator(Calculator):
         if hasattr(data, 'start') and len(data.start) > 1:
             total_energy = []
             all_forces = []
-            
+
             for i in range(len(data)):
                 # 直接调用 FragmentData 自带的 get_atoms 获得标准的 ASE Atoms
                 tmp_atoms = data.get_atoms(i)
