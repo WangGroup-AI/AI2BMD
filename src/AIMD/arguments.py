@@ -24,8 +24,16 @@ def init(argv=None):
     """
     global _args
 
+    #General arguments
     _src_dir = src_dir()
-    parser = argparse.ArgumentParser(description="DL Molecular Simulation.")
+    parser = argparse.ArgumentParser(description="DL Molecular Simulation & Geometry Optimization.")
+    parser.add_argument(
+    "--task",
+    type=str,
+    default="simulation",
+    choices=["simulation", "optimization"],
+    help="Specific Task",
+    )
     parser.add_argument(
         "--base-dir",
         type=str,
@@ -60,6 +68,52 @@ def init(argv=None):
         required=True,
         help="Protein file for simulation",
     )
+    parser.add_argument(
+        "--preprocess-method",
+        type=str,
+        default="FF19SB",
+        choices=["FF19SB", "AMOEBA", "NONE"],
+        help="Method to use for preprocessing the protein",
+    )
+    parser.add_argument(
+        "--mode",
+        type=str,
+        default="fragment",
+        choices=["fragment", "visnet"],
+        help="""Mode for performing calculations.
+        fragment=Perform fragmentation (>1 amino acids in chain).
+        visnet=Feed the input directly to ViSNet.
+        """,
+    )
+    parser.add_argument(
+        "--pima-mode",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="visnet pima will be used.",
+    )
+    parser.add_argument(
+        "--fragment-longrange-calc",
+        type=str,
+        default="mm",
+        choices=["mm", "pme"],
+        help="Long-range interactions calculator for fragments; required for 'fragment' mode.",
+    )
+    parser.add_argument(
+        "--device-strategy",
+        type=str,
+        default="small-molecule",
+        choices=["excess-compute", "small-molecule", "large-molecule"],
+        help="""The compute device allocation strategy.
+        excess-compute=Assume compute resources are more than sufficient for
+                ViSNet inference. Reserves last GPU for solvent/non-bonded
+                computation.
+        small-molecule=Maximise resources for ViSNet.
+        large-molecule=Maximise resources for ViSNet, while also maximising
+                concurrency and usage of GPUs for computation.
+        """,
+    )
+
+    #Simulation task specific arguments
     parser.add_argument(
         "--temp-k",
         type=int,
@@ -99,21 +153,14 @@ def init(argv=None):
     parser.add_argument(
         "--solvent",
         action=argparse.BooleanOptionalAction,
-        default=True,
+        default=False,
         help="Use solvent or not",
     )
     parser.add_argument(
         "--write-solvent",
         action=argparse.BooleanOptionalAction,
-        default=True,
+        default=False,
         help="Write coordinates of solvent atoms in output",
-    )
-    parser.add_argument(
-        "--preprocess-method",
-        type=str,
-        default="FF19SB",
-        choices=["FF19SB", "AMOEBA"],
-        help="Method to use for preprocessing the protein",
     )
     parser.add_argument(
         "--mm-method",
@@ -121,29 +168,6 @@ def init(argv=None):
         default="tinker-GPU",
         choices=["tinker", "tinker-GPU"],
         help="MM calculator for the nonbonded energy",
-    )
-    parser.add_argument(
-        "--mode",
-        type=str,
-        default="fragment",
-        choices=["fragment", "visnet"],
-        help="""Mode for performing calculations.
-        fragment=Perform fragmentation (>1 amino acids in chain).
-        visnet=Feed the input directly to ViSNet.
-        """,
-    )
-    parser.add_argument(
-        "--pima-mode",
-        action=argparse.BooleanOptionalAction,
-        default=False,
-        help="visnet pima will be used.",
-    )
-    parser.add_argument(
-        "--fragment-longrange-calc",
-        type=str,
-        default="mm",
-        choices=["mm", "pme"],
-        help="Long-range interactions calculator for fragments; required for 'fragment' mode.",
     )
     parser.add_argument(
         "--seed",
@@ -168,20 +192,6 @@ def init(argv=None):
         type=int,
         default=100,
         help="Interval for writing out frame data",
-    )
-    parser.add_argument(
-        "--device-strategy",
-        type=str,
-        default="small-molecule",
-        choices=["excess-compute", "small-molecule", "large-molecule"],
-        help="""The compute device allocation strategy.
-        excess-compute=Assume compute resources are more than sufficient for
-                ViSNet inference. Reserves last GPU for solvent/non-bonded
-                computation.
-        small-molecule=Maximise resources for ViSNet.
-        large-molecule=Maximise resources for ViSNet, while also maximising
-                concurrency and usage of GPUs for computation.
-        """,
     )
     parser.add_argument(
         "--work-strategy",
@@ -209,6 +219,32 @@ def init(argv=None):
         help="""Verbosity level"""
     )
 
+    #Optimization task specific arguments
+    parser.add_argument(
+        "--fmax",
+        type=float,
+        default=0.015,
+        help="Convergence threshold of RMS gradient.",
+    )
+    parser.add_argument(
+        "--max-cycles",
+        type=int,
+        default=10,
+        help="Max cycles of optimization.",
+    )
+    parser.add_argument(
+        "--max-step-size",
+        type=float,
+        default=0.05,
+        help="Max size of a sing optimization step.",
+    )
+    parser.add_argument(
+        "--vib",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Do vibrations.",
+    )
+
     _args = parser.parse_args(argv)
     _args.prot_name = os.path.basename(_args.prot_file)[:-4]
     if _args.log_dir is None:
@@ -216,13 +252,7 @@ def init(argv=None):
     os.makedirs(_args.log_dir, exist_ok=True)
     _args.base_dir = os.path.abspath(_args.base_dir)
     _args.log_dir = os.path.abspath(_args.log_dir)
-    if _args.pima_mode:
-        _args.ckpt_path = "./src/ViSNet/checkpoints/visnet_pima_trained_on_8m_PUDP_200epoch.zip"
     _args.ckpt_path = os.path.abspath(_args.ckpt_path)
-    """
-    if _args.pima_mode:
-        _args.ckpt_path = "./ViSNet/checkpoints/visnet_pima_trained_on_8m_PUDP_200epoch.zip"
-    """
     _args.prot_file = os.path.abspath(_args.prot_file)
     _args.utils_dir = os.path.join(_src_dir, "utils")
 

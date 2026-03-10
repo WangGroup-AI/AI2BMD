@@ -51,7 +51,7 @@ def run_command(command: str, cwd_path: str) -> None:
 
 
 def run_command_mamba(command: str, cwd_path: str, mamba_env: str) -> None:
-    command_with_env = f'bash -c "source  /etc/profile.d/source_conda.sh &&  mamba activate {mamba_env} && {command}"'
+    command_with_env = f'bash -c ". /opt/env && {command}"'
     run_command(command_with_env, cwd_path)
 
 
@@ -178,7 +178,7 @@ class Preprocess(object):
 
         maxcyc = arguments.get().max_cyc
 
-        if self.preprocess_method == "FF19SB":
+        if self.preprocess_method == "FF19SB" or "NONE":
             return f"{self.prot_path}.top",f"{self.prot_path}.inpcrd"
 
         if self.preprocess_method == "AMOEBA":
@@ -564,6 +564,419 @@ END
                 preeq_nowat_pdb,
         )
 
+    def preprocess_vacuum_minimal(self) -> Tuple[str, str]:
+        r"""
+        模仿 FF19SB 流程，仅使用 tleap 对原始 PDB 进行格式标准化。
+        不加水、不加离子、不做动力学平衡。
+        """
+        # 1. 准备 tleap 脚本
+        leap_input = "vacuum_leap.in"
+        output_pdb = f"{self.prot_path}-vacuum-clean.pdb"
+        
+        with open(leap_input, "w") as f:
+            f.write(
+                "{}\n{}\n{}\n{}\n".format(
+                    "source leaprc.protein.ff19SB",  # 加载标准力场以识别原子类型
+                    f"mol = loadpdb {self.prot_path}.pdb",
+                    f"savepdb mol {output_pdb}",     # 直接保存，tleap 会自动修正命名和补齐缺失原子
+                    "quit",
+                )
+            )
+
+        # 2. 运行 tleap
+        print(f"Running minimal vacuum standardization for {self.prot_path}...")
+        run_command_mamba(f"tleap -f {leap_input}", self.command_save_path, "ambertools")
+
+        # 3. 检查生成是否成功
+        if not os.path.exists(output_pdb):
+            raise FileNotFoundError(f"tleap failed to generate {output_pdb}")
+
+        # 4. 在真空模式下，solute-only 和 solvated 是同一个文件
+        return output_pdb, output_pdb
+    
+    def preprocess_vacuum_minimal_0(self) -> Tuple[str, str]:
+        r"""
+        模仿 FF19SB 流程进行真空预处理：
+        1. tleap 生成拓扑 (无水、无离子)
+        2. Minimization (能量最小化)
+        3. Heat (升温至 temp_k)
+        4. Pre-equilibration Stage 1 (固定蛋白平衡)
+        """
+        # --- 1. 使用 tleap 生成真空拓扑 ---
+        leap_input = "vacuum_leap.in"
+        vac_top = f"{self.prot_path}_vac.top"
+        vac_inpcrd = f"{self.prot_path}_vac.inpcrd"
+        
+        with open(leap_input, "w") as f:
+            f.write(
+                "{}\n{}\n{}\n{}\n".format(
+                    "source leaprc.protein.ff19SB",
+                    f"mol = loadpdb {self.prot_path}.pdb",
+                    f"saveamberparm mol {vac_top} {vac_inpcrd}",
+                    "quit",
+                )
+            )
+        run_command_mamba(f"tleap -f {leap_input}", self.command_save_path, "ambertools")
+        
+        # 获取残基数用于约束
+        num_residue = self.count_residues(vac_top)
+        maxcyc = arguments.get().max_cyc
+        ncyc = maxcyc // 2
+
+        # --- 2. Energy Minimization ---
+        min_data = f"""Vacuum Minimization
+&cntrl
+ imin=1, maxcyc={maxcyc},
+ ncyc={ncyc},
+ ntb=0, 
+ igb=8, 
+ cut=999.0,
+ /
+"""
+        with open("vac_min.in", "w") as f:
+            f.write(min_data)
+
+        run_command_mamba(f"sander -O -i vac_min.in -p {vac_top} -c {vac_inpcrd} -o vac_min.out -r vac_min.rst", 
+                          self.command_save_path, "ambertools")
+
+        # --- 3. Heating (0K to temp_k) ---
+        # 模仿 FF19SB 风格，使用双 END 和多行字符串确保末尾换行
+        heat_data = f"""Vacuum Heating
+&cntrl
+ imin = 0, 
+ irest = 0, 
+ ntx = 1,
+ nstlim = 20000, 
+ dt = 0.002,
+ ntb = 0, 
+ igb = 8, 
+ cut = 999.0,
+ tempi = 0.0, 
+ temp0 = {self.temp_k},
+ ntt = 3, 
+ vlimit = 10,
+ gamma_ln = 1.0,
+ ntr = 1, 
+ ntpr = 1000, ntwx = 1000, ntwr = 1000
+ nmropt = 0,
+ /
+Hold protein fixed
+10.0
+RES 1 {num_residue}
+END
+END
+"""
+        with open("vac_heat.in", "w") as f:
+            f.write(heat_data)
+
+        run_command_mamba(f"sander -O -i vac_heat.in -p {vac_top} -c vac_min.rst -o vac_heat.out -r vac_heat.rst -ref vac_min.rst", 
+                          self.command_save_path, "ambertools")
+
+
+        # --- 4. Final PDB Generation ---
+        output_pdb = f"{self.prot_path}-vacuum-preeq.pdb"
+        cpptraj_in = f"""parm {vac_top}
+trajin vac_heat.rst
+trajout {output_pdb}
+"""
+        with open("gene_vac_pdb.in", "w") as f:
+            f.write(cpptraj_in)
+        
+        run_command_mamba("cpptraj -i gene_vac_pdb.in", self.command_save_path, "ambertools")
+
+        return output_pdb, output_pdb
+    
+    def preprocess_ff19sb_fake(self, solv_top: str, solv_inpcrd: str) -> Tuple[str, str]:
+        maxcyc = arguments.get().max_cyc
+        ncyc = maxcyc // 2
+        num_residue = self.count_residues(solv_top)
+
+        num_process = get_physical_core_count()
+
+        with open("min.in", "w") as fmin:
+            fmin.write(
+                "{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n".format(
+                    "Energy minimization",
+                    "&cntrl",
+                    " imin=1",
+                    f" maxcyc={maxcyc}",
+                    f" ncyc={ncyc}",
+                    " iwrap = 1",
+                    " cut=10.0",
+                    " ntb=1",
+                    " /"
+                )
+            )
+
+        run_command_mamba(
+            f"sander -O -i min.in -p {solv_top} -c {solv_inpcrd} -o min.out -inf min.info "
+            f"-r min.rst -x min.mdcrd -ref {solv_inpcrd}", self.command_save_path, "ambertools"
+        )
+
+        """Sander heat steps for sander-based pre-equilibration.
+        Input: min.rst {prot_name}.top {prot_name}.inpcrd
+        Output: heat.rst
+        By-products: heat.in heat.out
+        """
+        nstlim = 100
+        data = f"""heating from 0K too {self.temp_k}K
+&cntrl
+ imin = 0,
+ irest = 0,
+ ntx = 1,
+ ntb = 1,
+ iwrap = 1,
+ cut = 10,
+ ntr = 1,
+ ntc = 2,
+ ntf = 2,
+ tempi = 0.0,
+ temp0 = {self.temp_k},
+ ntt = 3,vlimit = 10,
+ gamma_ln = 1.0,
+ nstlim = {nstlim}, dt = 0.002,
+ ntpr = 1000, ntwx = 1000, ntwr = 1000
+ /
+Hold the protein fixed
+10.0
+RES 1 {num_residue}
+END
+END
+"""
+
+        with open("heat.in", "w") as f:
+            f.write(data)
+
+        run_command_mamba(
+            f"sander -O -i heat.in -p {solv_top} -c min.rst -o heat.out -inf heat.info "
+            "-r heat.rst -x heat.mdcrd -ref min.rst", self.command_save_path, "ambertools"
+        )
+
+        """Sander-based pre-equilibration stage 1.
+        Input: heat.rst {prot_name}.top {prot_name}.inpcrd
+        Output: preeq1.rst
+        By-products: preeq1.in preeq1.out
+        """
+        nstlim = 100
+        data = f"""pre-eq1, NVT
+&cntrl
+ imin=0,
+ ntb=1,
+ ntp=0,
+ iwrap=1,
+ ntx=5,
+ irest=1,
+ ntr=1,
+ ig=-1,
+ ntc=1,
+ ntf=1,
+ ntpr=1000,
+ ntwx=1000,
+ ntwr=1000,
+ ntt=3,
+ gamma_ln=1.0,
+ nstlim={nstlim},
+ dt=0.001,
+ cut=10.0
+ tempi={self.temp_k},
+ temp0={self.temp_k},
+ /
+Hold protein fixed
+10.0
+RES 1 {num_residue}
+END
+END
+"""
+
+        with open("preeq1.in", "w") as f:
+            f.write(data)
+
+        run_command_mamba(
+            f"sander -O -i preeq1.in -c heat.rst -o preeq1.out -inf preeq1.info "
+            f"-r preeq1.rst -x preeq1.mdcrd  -ref heat.rst -p {solv_top}", self.command_save_path, "ambertools"
+        )
+
+        """Sander-based pre-equilibration stage 2.
+        Input: preeq1.rst {prot_name}.top {prot_name}.inpcrd
+        Output: preeq2.rst
+        By-products: preeq2.in preeq2.out
+        """
+
+        nstlim = 100
+        data = f"""pre-eq2, NVT
+&cntrl
+ imin=0,
+ ntb=1,
+ ntp=0,
+ iwrap=1,
+ ntx=5,
+ irest=1,
+ ntr=1,
+ ig=-1,
+ ntc=1,
+ ntf=1,
+ ntpr=1000,
+ ntwx=1000,
+ ntwr=1000,
+ ntt=3,
+ gamma_ln=1.0,
+ nstlim={nstlim},
+ dt=0.001,
+ cut=10.0,
+ tempi={self.temp_k},
+ temp0={self.temp_k},
+/
+Hold protein fixed
+10.0
+RES :1-{num_residue}@CA
+END
+END
+"""
+
+        with open("preeq2.in", "w") as f:
+            f.write(data)
+
+        run_command_mamba(
+            f"sander -O -i preeq2.in -c preeq1.rst -o preeq2.out -inf preeq2.info "
+            f"-r preeq2.rst -x preeq2.mdcrd  -ref preeq1.rst -p {solv_top}", self.command_save_path, "ambertools"
+        )
+
+        """Sander-based pre-equilibration stage 3.
+        Input: preeq2.rst {prot_name}.top {prot_name}.inpcrd
+        Output: preeq3.rst
+        By-products: preeq3.in preeq3.out
+        """
+        nstlim = 100
+        data = f"""pre-eq3, NVT
+&cntrl
+ imin=0,
+ ntb=1,
+ ntp=0,
+ iwrap=1,
+ ntx=5,
+ irest=1,
+ ig=-1,
+ ntc=1,
+ ntf=1,
+ ntpr=1000,
+ ntwx=1000,
+ ntwr=1000,
+ ntt=3,
+ gamma_ln=1.0,
+ nstlim={nstlim},
+ dt=0.001,
+ cut=10.0,
+ tempi={self.temp_k},
+ temp0={self.temp_k},
+/
+"""
+
+        with open("preeq3.in", "w") as f:
+            f.write(data)
+
+        run_command_mamba(
+            f"sander -O -i preeq3.in -c preeq2.rst -o preeq3.out -inf preeq3.info "
+            f"-r preeq3.rst -x preeq3.mdcrd  -ref preeq2.rst -p {solv_top}", self.command_save_path, "ambertools"
+        )
+
+        """Sander-based pre-equilibration stage 4.
+        Input: preeq3.rst {prot_name}.top {prot_name}.inpcrd
+        Output: preeq.rst <- NOTE: different naming scheme than previous steps!
+        By-products: preeq4.in preeq4.out
+        """
+
+        nstlim = 100
+        data = f"""pre-eq4, NPT
+&cntrl
+ imin=0,
+ ntb=2,
+ ntp=2,
+ iwrap=1,
+ ntx=5,
+ irest=1,
+ ig=-1,
+ ntc=1,
+ ntf=1,
+ ntpr=1000,
+ ntwx=1000,
+ ntwr=1000,
+ ntt=3,
+ gamma_ln=1.0,
+ nstlim={nstlim},
+ dt=0.001,
+ ioutfm=1,
+ ntxo=2,
+ cut=10,
+ tempi={self.temp_k},
+ temp0={self.temp_k},
+/
+"""
+
+        with open("preeq4.in", "w") as f:
+            f.write(data)
+
+        run_command_mamba(
+            f"sander -O -i preeq4.in -c preeq3.rst -o preeq4.out -inf preeq4.info "
+            f"-r preeq.rst -x preeq4.mdcrd  -ref preeq3.rst -p {solv_top}", self.command_save_path, "ambertools"
+        )
+
+        # generate_pdb
+        preeq_pdb = f"{self.prot_path}-preeq.pdb"
+        with open("gene_pdb_from_rst.in", "w") as frst:
+            frst.write(
+                "{}\n{}\n{}\n".format(
+                    f"parm {solv_top}",
+                    f"trajin preeq.rst",
+                    "trajout {}".format(preeq_pdb),
+                )
+            )
+
+        run_command_mamba("cpptraj -i gene_pdb_from_rst.in", self.command_save_path, "ambertools")
+
+        # get solute only pdb，remove water and ions
+        with open(f"{self.prot_path}-preeq.pdb") as f:
+            text = f.readlines()
+            with open(f"{self.prot_path}-preeq-nowat.pdb", "w") as fsolute:
+                atom_begidx = 0
+                for line in text:
+                    if line.startswith("ATOM") or line.startswith("HETATM"):
+                        break
+                    else:
+                        atom_begidx += 1
+                fsolute.write("".join(text[:atom_begidx]))
+                fsolute.write("".join([x for x in text if (x.startswith("ATOM") or x.startswith('HETATM')) and x[17:20].strip().lower() not in ["na", "na+", "cl", "cl-", "wat", "hoh"]]))
+
+        return f"{self.prot_path}-preeq.pdb", f"{self.prot_path}-preeq-nowat.pdb"
+    
+    def preprocess_ff19sb_fake_0(self, solv_top: str, solv_inpcrd: str) -> Tuple[str, str]:
+        # generate_pdb
+        preeq_pdb = f"{self.prot_path}-preeq.pdb"
+        with open("gene_pdb_from_rst.in", "w") as frst:
+            frst.write(
+                "{}\n{}\n{}\n".format(
+                    f"parm {solv_top}",
+                    f"trajin {solv_inpcrd}",
+                    "trajout {}".format(preeq_pdb),
+                )
+            )
+
+        run_command_mamba("cpptraj -i gene_pdb_from_rst.in", self.command_save_path, "ambertools")
+
+        # get solute only pdb，remove water and ions
+        with open(f"{self.prot_path}-preeq.pdb") as f:
+            text = f.readlines()
+            with open(f"{self.prot_path}-preeq-nowat.pdb", "w") as fsolute:
+                atom_begidx = 0
+                for line in text:
+                    if line.startswith("ATOM") or line.startswith("HETATM"):
+                        break
+                    else:
+                        atom_begidx += 1
+                fsolute.write("".join(text[:atom_begidx]))
+                fsolute.write("".join([x for x in text if (x.startswith("ATOM") or x.startswith('HETATM')) and x[17:20].strip().lower() not in ["na", "na+", "cl", "cl-", "wat", "hoh"]]))
+
+        return f"{self.prot_path}-preeq.pdb", f"{self.prot_path}-preeq-nowat.pdb"
+    
     @record_time
     def run_preprocess(self) -> List[str]:
         os.makedirs(self.command_save_path, exist_ok=True)
@@ -594,3 +1007,14 @@ END
             reorder_coord_amber2tinker(preeq_nowat_pdb)
 
             return self.organize_files([preeq_pdb, preeq_nowat_pdb])
+
+        if self.preprocess_method == "NONE":
+            #preeq_pdb, preeq_nowat_pdb = self.preprocess_vacuum_minimal()
+
+            solv_top, solv_inpcrd = self.run_leap_mm()
+            preeq_pdb, preeq_nowat_pdb = self.preprocess_ff19sb_fake_0(solv_top, solv_inpcrd)
+            reorder_coord_amber2tinker(preeq_pdb)
+            reorder_coord_amber2tinker(preeq_nowat_pdb)
+
+            return self.organize_files([preeq_pdb, preeq_nowat_pdb])
+    

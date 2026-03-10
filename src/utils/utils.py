@@ -151,12 +151,14 @@ class MDObserver:
             epot = self.a.get_potential_energy().item()
             ekin = self.a.get_kinetic_energy().item()
             temperature = self.a.get_temperature()
-            if temperature > 1.5 * self.temp_k:
-                raise TemperatureRunawayError(temperature, "temperature runaway")
             print(f"Step {self.get_md_step():d}: "
                   f"Epot = {epot:.3f}eV "
                   f"Ekin = {ekin:.3f}eV "
-                  f"Etot = {epot+ekin:.3f}eV")
+                  f"Etot = {epot+ekin:.3f}eV"
+                  f"Temperature = {temperature.mean():.3f} K"
+                  )
+            if temperature > 1.5 * self.temp_k:
+                raise TemperatureRunawayError(temperature, "temperature runaway")
 
     @delay_work
     def fill_rng_pool(self):

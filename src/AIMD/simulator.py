@@ -111,7 +111,7 @@ class BaseSimulator(ABC):
             self.prot,
             timestep=time_step * units.fs,
             temperature_K=self.temp_k,
-            friction=0.001 / units.fs,
+            friction=0.01 / units.fs,
             rng=rng_pool,
         )
 
