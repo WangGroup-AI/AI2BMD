@@ -86,12 +86,6 @@ def init(argv=None):
         """,
     )
     parser.add_argument(
-        "--pima-mode",
-        action=argparse.BooleanOptionalAction,
-        default=False,
-        help="visnet pima will be used.",
-    )
-    parser.add_argument(
         "--fragment-longrange-calc",
         type=str,
         default="mm",

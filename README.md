@@ -197,6 +197,9 @@ AI<sup>2</sup>BMD also supports to train the machine learning potential by yours
 
 To perform the whole AI<sup>2</sup>BMD simulation including the preprocess, please use the following commands as reference.
 
+### Geometry Optimization
+AI<sup>2</sup>BMD supports geometry optimization by setting the argument "task" to "optimization". This feature is based on ASE framework, and use the visnet model to predict the energy and force. The default GO method is LBFGS and BFGSLinsearch.
+
 ```shell
 wget 'https://raw.githubusercontent.com/microsoft/AI2BMD/main/scripts/ai2bmd'
 chmod +x ai2bmd
