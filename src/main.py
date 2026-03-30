@@ -46,7 +46,7 @@ if __name__ == "__main__":
     fix_atomic_numbers(preeq_pdb, prot)
     
     task_type = args.task
-
+    args.pima_mode=False
     if task_type == "optimization":
         print(f"Task: Optimization detected. Initializing ProteinOptimizer...")
         prot = Protein(read_protein(preeq_nowat_pdb), pdb4params=preeq_nowat_pdb)
