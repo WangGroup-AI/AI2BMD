@@ -35,10 +35,10 @@ We can run a molecular dynamics simulation as follows.
 ```shell
 cd ~/AI2BMD
 # download the Chignolin protein structure data file
-wget 'https://raw.githubusercontent.com/microsoft/AI2BMD/main/examples/chig.pdb' -P ./example
+wget --directory-prefix=examples 'https://raw.githubusercontent.com/microsoft/AI2BMD/main/examples/chig.pdb' 
 # download the preprocessed and solvated Chignolin protein structure data files
-wget --directory-prefix=chig_preprocessed 'https://raw.githubusercontent.com/microsoft/AI2BMD/main/examples/chig_preprocessed/chig-preeq.pdb' -P ./example
-wget --directory-prefix=chig_preprocessed 'https://raw.githubusercontent.com/microsoft/AI2BMD/main/examples/chig_preprocessed/chig-preeq-nowat.pdb' -P ./example
+wget --directory-prefix=examples/chig_preprocessed 'https://raw.githubusercontent.com/microsoft/AI2BMD/main/examples/chig_preprocessed/chig-preeq.pdb' 
+wget --directory-prefix=examples/chig_preprocessed 'https://raw.githubusercontent.com/microsoft/AI2BMD/main/examples/chig_preprocessed/chig-preeq-nowat.pdb' 
 # launch the program, with all simulation parameters set to default values
 # you may need to "sudo" the following line if the docker group is not configured for the user
 cd ~ #the path of the ai2bmd.sif
