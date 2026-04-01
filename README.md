@@ -33,16 +33,19 @@ To run the simulation program, you don't need to clone this repository. Simply d
 We can run a molecular dynamics simulation as follows.
 
 ```shell
+cd ~/AI2BMD
 # download the Chignolin protein structure data file
-wget 'https://raw.githubusercontent.com/microsoft/AI2BMD/main/examples/chig.pdb'
+wget 'https://raw.githubusercontent.com/microsoft/AI2BMD/main/examples/chig.pdb' -P ./example
 # download the preprocessed and solvated Chignolin protein structure data files
-wget --directory-prefix=chig_preprocessed 'https://raw.githubusercontent.com/microsoft/AI2BMD/main/examples/chig_preprocessed/chig-preeq.pdb'
-wget --directory-prefix=chig_preprocessed 'https://raw.githubusercontent.com/microsoft/AI2BMD/main/examples/chig_preprocessed/chig-preeq-nowat.pdb'
+wget --directory-prefix=chig_preprocessed 'https://raw.githubusercontent.com/microsoft/AI2BMD/main/examples/chig_preprocessed/chig-preeq.pdb' -P ./example
+wget --directory-prefix=chig_preprocessed 'https://raw.githubusercontent.com/microsoft/AI2BMD/main/examples/chig_preprocessed/chig-preeq-nowat.pdb' -P ./example
 # launch the program, with all simulation parameters set to default values
 # you may need to "sudo" the following line if the docker group is not configured for the user
+cd ~ #the path of the ai2bmd.sif
 apptainer run --nv ai2bmd.sif
 . /opt/env
-python ~/src/main.py --prot-file chig.pdb --task simulation --base-dir ~ --sim-steps 1000 --temp-k 300 --timestep 1 --preeq-steps 0 --record-per-steps 1 
+cd ~/AI2BMD
+python ./src/main.py --prot-file ./examples/chig.pdb --task simulation --base-dir ~ --sim-steps 1000 --temp-k 300 --timestep 1 --preeq-steps 0 --record-per-steps 1 
 ```
 
 Here we use a very simple protein `Chignolin` as an example.
