@@ -10,6 +10,7 @@
 
 ## Feature Updates
 - **Add Geometry Optimization function**
+- **Support GPU RTX5090**
 
 ## Get Started
 
