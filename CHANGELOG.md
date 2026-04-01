@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-04-01
+### Added
+- Geometry Optimization function
+
 ## [1.1.0] - 2025-02-18
 ### Added
 - new checkpoint with support for cystine residues
