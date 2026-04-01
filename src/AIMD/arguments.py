@@ -28,11 +28,12 @@ def init(argv=None):
     _src_dir = src_dir()
     parser = argparse.ArgumentParser(description="DL Molecular Simulation & Geometry Optimization.")
     parser.add_argument(
-    "--task",
-    type=str,
-    default="simulation",
-    choices=["simulation", "optimization"],
-    help="Specific Task",
+        "--task",
+        type=str,
+        default="simulation",
+        choices=["simulation", "optimization"],
+        required=True,
+        help="Specific Task",
     )
     parser.add_argument(
         "--base-dir",
