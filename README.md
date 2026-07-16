@@ -12,6 +12,12 @@
 - **Added Geometry Optimization function**
 - **Added support for Blackwell architecture GPUs.**
 
+## Wechat Group
+Join our official user group to get support, track our latest updates, and connect with other users!
+<p align="center">
+  <img src="./docs/Group_QR_Code.png" alt="Wechat Group" width="30%" />
+</p>
+
 ## Get Started
 
 The source code of AI<sup>2</sup>BMD is hosted in this repository.
