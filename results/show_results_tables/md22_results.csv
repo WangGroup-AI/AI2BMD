@@ -1,0 +1,8 @@
+Dataset,Energy MAE (kcal/mol),Force MAE (kcal/mol/Å)
+Ac-Ala3-NHMe,0.0530,0.0744
+DHA,0.0784,0.0534
+Stachyose,0.0843,0.0677
+AT-AT,0.0772,0.0781
+AT-AT-CG-CG,0.1571,0.1142
+Buckyball catcher,0.2032,0.0935
+Double-walled nanotube,0.4522,0.2243

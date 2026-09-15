@@ -1,0 +1,7 @@
+Model,Scalar MAE (meV),Force MAE (meV/Å)
+20% finetuned with pretraining,149.12,29.05
+40% finetuned with pretraining,121.24,25.00
+60% finetuned with pretraining,110.08,22.88
+80% finetuned with pretraining,103.63,21.68
+100% finetuned with pretraining,94.53,20.71
+100% finetuned without pretraining,145.38,25.91

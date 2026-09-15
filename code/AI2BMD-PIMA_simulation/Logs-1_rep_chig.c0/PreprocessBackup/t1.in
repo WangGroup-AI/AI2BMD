@@ -1,0 +1,6 @@
+source leaprc.protein.ff19SB
+source leaprc.water.tip3p
+mol = loadpdb /home/sunxin/GITHUB_MAINTAIN/ViSNet-PIMA/code/AI2BMD-PIMA_simulation/testcases/1_rep_chig.c0.pdb
+solvatebox mol TIP3PBOX 20
+saveamberparm mol /home/sunxin/GITHUB_MAINTAIN/ViSNet-PIMA/code/AI2BMD-PIMA_simulation/testcases/1_rep_chig.c01.top /home/sunxin/GITHUB_MAINTAIN/ViSNet-PIMA/code/AI2BMD-PIMA_simulation/testcases/1_rep_chig.c01.inpcrd
+quit

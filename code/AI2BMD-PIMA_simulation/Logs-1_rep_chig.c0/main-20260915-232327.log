@@ -1,0 +1,21 @@
+Preprocessing step already done, skip...
+run_preprocess takes 0.01958298683166504 seconds
+Loading models...
+Initializing tinker...
+Initializing tinker...
+Pre-equilibration step already done, skip...
+Start simulation for 1000 steps
+Step 0:  Epot = -129871.825eV  Ekin = 701.492eV (T = 293K)  Etot = -129170.333eV
+Step 100:  Epot = -129873.456eV  Ekin = 704.750eV (T = 295K)  Etot = -129168.706eV
+Step 200:  Epot = -129868.817eV  Ekin = 698.439eV (T = 292K)  Etot = -129170.378eV
+Step 300:  Epot = -129873.783eV  Ekin = 702.287eV (T = 294K)  Etot = -129171.497eV
+Step 400:  Epot = -129861.152eV  Ekin = 692.673eV (T = 290K)  Etot = -129168.478eV
+Step 500:  Epot = -129862.857eV  Ekin = 698.626eV (T = 292K)  Etot = -129164.231eV
+Step 600:  Epot = -129861.131eV  Ekin = 696.079eV (T = 291K)  Etot = -129165.052eV
+Step 700:  Epot = -129862.781eV  Ekin = 702.166eV (T = 294K)  Etot = -129160.615eV
+Step 800:  Epot = -129860.555eV  Ekin = 702.631eV (T = 294K)  Etot = -129157.923eV
+Step 900:  Epot = -129861.886eV  Ekin = 711.384eV (T = 297K)  Etot = -129150.502eV
+Step 1000:  Epot = -129856.634eV  Ekin = 707.903eV (T = 296K)  Etot = -129148.732eV
+Simulation finished!
+Building PDB trajectory from trajectory...
+Done building PDB trajectory.

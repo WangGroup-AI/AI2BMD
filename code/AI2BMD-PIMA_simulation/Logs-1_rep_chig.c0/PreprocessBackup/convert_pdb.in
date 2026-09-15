@@ -1,0 +1,3 @@
+parm /home/sunxin/GITHUB_MAINTAIN/ViSNet-PIMA/code/AI2BMD-PIMA_simulation/testcases/1_rep_chig.c0.top
+trajin /home/sunxin/GITHUB_MAINTAIN/ViSNet-PIMA/code/AI2BMD-PIMA_simulation/testcases/1_rep_chig.c0.inpcrd
+trajout /home/sunxin/GITHUB_MAINTAIN/ViSNet-PIMA/code/AI2BMD-PIMA_simulation/testcases/1_rep_chig.c0_tleap1.pdb
