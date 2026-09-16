@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./code/logo.png" alt="ViSNet-PIMA logo" width="100%">
+  <img src="./code/logo.png" alt="ViSNet-PIMA" width="100%">
 </p>
 
 <h1 align="center">
@@ -43,8 +43,8 @@ Clone this repository and enter its root directory.
 The complete environment used by the unified reproduction workflow is specified in [`environment.yml`](./code/ViSNet-PIMA_test_on_Chig_and_MD22/environment.yml). From the repository root, run:
 
 ```bash
-conda env create --file code/ViSNet-PIMA-final/environment.yml
-conda activate ViSNet
+conda env create --file ./environment.yml
+conda activate ViSNet-PIMA
 ```
 
 The environment uses Python 3.10, PyTorch 2.3.1 with CUDA 11.8, and the corresponding PyTorch Geometric extensions.
@@ -62,7 +62,7 @@ For GPU inference, `CUDA available` should report `True` and the expected GPU sh
 Run the complete workflow with the following command:
 
 ```bash
-./code/run
+bash ./run_all.sh
 ```
 
 The master script executes the following stages in order:
@@ -77,7 +77,7 @@ The master script executes the following stages in order:
 All terminal output produced by the unified workflow is also saved to:
 
 ```text
-results/output
+results/*
 ```
 
 ### MD22 evaluation order
@@ -107,22 +107,22 @@ The learning-curve and ablation models are evaluated in the following order, mat
 
 Each stage can be run independently from the repository root while preserving the same order and configuration used by the unified workflow.
 
-### 1. AIMD-Chig
+### 1. MD22
 
 ```bash
-bash code/ViSNet-PIMA-final/inference_Chig.sh
+bash code/ViSNet-PIMA_test_on_Chig_and_MD22/inference_MD22.sh
 ```
 
-### 2. MD22
+### 2. AIMD-Chig
 
 ```bash
-bash code/ViSNet-PIMA-final/inference_MD22.sh
+bash code/ViSNet-PIMA_test_on_Chig_and_MD22/inference_Chig.sh
 ```
 
 ### 3. Trp-cage learning curve and ablation study
 
 ```bash
-bash code/AI2BMD-PIMA/inference_Trp-cage.sh
+bash code/ViSNet-PIMA_train_and_test_on_Trp/inference_Trp-cage.sh
 ```
 
 ### 4. NCI Atlas
@@ -147,7 +147,6 @@ We provide scripts for running molecular dynamics simulations and evaluating mul
 
 ```bash
 bash code/AI2BMD-PIMA_simulation/run.sh
-bash code/AI2BMD-PIMA_simulation/infer_multiframe_pdb.sh
 ```
 
 The animation below shows a representative molecular dynamics trajectory generated with the AI<sup>2</sup>BMD-PIMA simulation workflow.
@@ -164,8 +163,8 @@ The animation below shows a representative molecular dynamics trajectory generat
 To train ViSNet-PIMA on AIMD-Chig, run:
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python code/ViSNet-PIMA-final/train.py \
-  --conf code/ViSNet-PIMA-final/examples_MD22_AIMD-Chig/ViSNet-Chignolin.yml \
+CUDA_VISIBLE_DEVICES=0 python code/ViSNet-PIMA_test_on_Chig_and_MD22/train.py \
+  --conf code/ViSNet-PIMA_test_on_Chig_and_MD22/examples_MD22_AIMD-Chig/ViSNet-Chignolin.yml \
   --dataset-root data/AIMD-Chig \
   --log-dir results/log_Chig
 ```
@@ -177,8 +176,8 @@ Example training configuration files for the other datasets are provided in [`ex
 To train ViSNet-PIMA on MD22, run:
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python code/ViSNet-PIMA-final/train.py \
-  --conf code/ViSNet-PIMA-final/examples_MD22_AIMD-Chig/ViSNet-MD22-Ac_Ala3_NHMe.yml \
+CUDA_VISIBLE_DEVICES=0 python code/ViSNet-PIMA_test_on_Chig_and_MD22/train.py \
+  --conf code/ViSNet-PIMA_test_on_Chig_and_MD22/examples_MD22_AIMD-Chig/ViSNet-MD22-Ac_Ala3_NHMe.yml \
   --dataset-root data/md22-dataset \
   --log-dir results/log_MD22
 ```
