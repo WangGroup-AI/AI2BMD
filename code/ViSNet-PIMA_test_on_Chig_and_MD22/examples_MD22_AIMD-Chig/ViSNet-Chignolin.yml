@@ -59,7 +59,7 @@ vertex_type: None
 ngpus: -1
 num_nodes: 1
 precision: 32
-log_dir: ../../../results/log_chig_0904
+log_dir: ../../../results/log_Chig
 task: train
 seed: 1
 distributed_backend: ddp

@@ -59,7 +59,7 @@ vertex_type: None
 ngpus: -1
 num_nodes: 1
 precision: 32
-log_dir: ../../../results/log_md22_test
+log_dir: ../../../results/log_md22_Ac_Ala3_NHMe
 task: train
 seed: 1
 distributed_backend: ddp
