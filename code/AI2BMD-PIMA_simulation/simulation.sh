@@ -1,8 +1,7 @@
-export CUDA_VISIBLE_DEVICES="0"
+export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-apptainer exec --nv --bind "${SCRIPT_DIR}:${SCRIPT_DIR}" "${SCRIPT_DIR}/apptainer/ai2bmd.sif" \
-  bash -c "source /opt/env && python \"${SCRIPT_DIR}/src/main.py\" \
+python \"${SCRIPT_DIR}/src/main.py\" \
     --prot-file \"${SCRIPT_DIR}/testcases/1_rep_chig.c0.pdb\" \
     --base-dir \"${SCRIPT_DIR}\" \
     --ckpt-path \"${SCRIPT_DIR}/src/ViSNet/checkpoints\" \
@@ -18,6 +17,6 @@ apptainer exec --nv --bind "${SCRIPT_DIR}:${SCRIPT_DIR}" "${SCRIPT_DIR}/apptaine
     --solvent-method AMOEBA \
     --frag-nonbonded-calc pima \
     --fragcalc fragment \
-    --device-strategy large-molecule"
+    --device-strategy large-molecule
 
 echo 'Successfully finished running the simulation.'

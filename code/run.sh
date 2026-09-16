@@ -21,6 +21,6 @@ bash inference_NCIA.sh "$@"
 exec > >(tee "${OUTPUT_FILE}") 2>&1
 python "${SCRIPT_DIR}/show_results.py"
 
-echo "Running ViSNet-PIMA for simulation and calculation..."
+echo "Running ViSNet-PIMA for simulation..."
 cd "${SCRIPT_DIR}/AI2BMD-PIMA_simulation"
-bash run.sh "$@"
+bash simulation.sh "$@"

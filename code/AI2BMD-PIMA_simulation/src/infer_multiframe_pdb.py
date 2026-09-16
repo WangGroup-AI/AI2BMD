@@ -22,7 +22,7 @@ warnings.filterwarnings("ignore", message=r".*\.jittable.*deprecated.*", categor
 warnings.filterwarnings("ignore", message=r"Converting a tensor with requires_grad=True to a scalar.*", category=UserWarning)
 
 SRC_DIR = Path(__file__).resolve().parent
-DEFAULT_INPUT_DIR = SRC_DIR.parent / "M062X_6-31G*_TESTSET"
+DEFAULT_INPUT_DIR = SRC_DIR.parents[2] / "data" / "M062X_protein"
 DEFAULT_CKPT_PATH = SRC_DIR / "ViSNet" / "checkpoints"
 FIXED_CKPT_TYPE = "new"
 FIXED_FRAGMENT_CALC = "fragment"

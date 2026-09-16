@@ -3,26 +3,32 @@
 </p>
 
 <h1 align="center">
-  Enhancing long-range interaction modeling for ab initio biomolecular calculation with ViSNet-PIMA
+  Enhancing long-range interaction modeling for <i>ab initio</i> biomolecular calculations and simulations with ViSNet-PIMA
 </h1>
 
 <p align="center">
   <a><img src="https://img.shields.io/badge/License-MIT-green"></a>
   <a><img src="https://img.shields.io/github/last-commit/WangGroup-AI/AI2BMD"></a>
-  <a><img src="https://img.shields.io/badge/Python-3.10-red"></a>
-</p> 
+  <a><img src="https://img.shields.io/badge/Python-3.11-red"></a>
+</p>
 
 ## Overview
 
 ViSNet-PIMA (short for “**ViSNet** with **P**hysics-**I**nformed **M**ultipole **A**ggregator”) combines multipole expansion theory with ViSNet to accurately model both short-range and long-range molecular interactions, outperforming state-of-the-art MLFFs in energy and force predictions.
 
+<img src="./code/PIMA_arch.png" alt="ViSNet-PIMA architecture" width="100%">
+
+AI2BMD-PIMA integrates ViSNet-PIMA into protein simulations through a three-stage "Transfer Learning--Pretraining--Finetuning" strategy. It transfers local fragment representations, pretrains non-local interactions on molecular mechanics (MM) data, and finetunes with limited DFT labels, enabling accurate inter-fragment energy and force predictions at substantially reduced computational and data costs for biomolecular simulations.
+
+<img src="./code/AI2BMD-PIMA_arch.png" alt="AI2BMD-PIMA architecture" width="100%">
+
 ## 🌟 Quick Start
 
-### **We have provided a jupyter notebook named `run_all.ipynb`. Users can click the `Run All` button to reproduce all the results.**
+### **We have provided a Jupyter Notebook named `run_all.ipynb`. Users can click the `Run All` button to reproduce all the results.**
 
 ![Button](./code/button.png)
 
-For reproduction, users can also open a terminal and run:
+Users can also open a terminal and run:
 
 ```bash
 bash ./run_all.sh
@@ -30,32 +36,23 @@ bash ./run_all.sh
 
 This command sequentially runs all evaluation tasks and displays the consolidated results.
 
-These experimental are also saved in the `results` folder. Meanwhile, the generated simulation trajectories are saved in `code/AI2BMD-PIMA_simulation/Logs-1_rep_chig.c0/SimulationResults/*`.
+These experimental results are also saved in the `results` folder. Meanwhile, the generated simulation trajectories are saved in `code/AI2BMD-PIMA_simulation/Logs-1_rep_chig.c0/SimulationResults/*`, including the `.traj` and `.pdb` files.
 
 ## Environments
 
-### 1. Clone the repository
+### 1. Introduction
 
-Clone this repository and enter its root directory.
+Our environment is based on Docker, and the conda environment `PIMA` will be activated automatically for running.
 
-### 2. Create the Conda environment
+The environment uses `Python 3.11`, `PyTorch 2.8.0` with `CUDA 12.8`, and the corresponding `PyTorch Lightning` and `PyTorch Geometric` extensions, as well as `jax[cuda12] 0.4.33`.
 
-The complete environment used by the unified reproduction workflow is specified in [`environment.yml`](./code/ViSNet-PIMA_test_on_Chig_and_MD22/environment.yml). From the repository root, run:
+### 2. Activate the Conda environment (optional)
 
-```bash
-conda env create --file ./environment.yml
-conda activate ViSNet-PIMA
-```
-
-The environment uses Python 3.10, PyTorch 2.3.1 with CUDA 11.8, and the corresponding PyTorch Geometric extensions.
-
-### 3. Verify CUDA availability
+From the repository root, run:
 
 ```bash
-python -c "import torch; print('PyTorch:', torch.__version__); print('CUDA runtime:', torch.version.cuda); print('CUDA available:', torch.cuda.is_available()); print('GPU:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'None')"
+conda activate PIMA
 ```
-
-For GPU inference, `CUDA available` should report `True` and the expected GPU should be displayed.
 
 ## Reproduction Workflow
 
@@ -73,12 +70,18 @@ The master script executes the following stages in order:
 | 2 | MD22 | [`inference_MD22.sh`](./code/ViSNet-PIMA_test_on_Chig_and_MD22/inference_MD22.sh) | `results/log_md22_*/inference_results.pt` |
 | 3 | Trp-cage learning curve and ablation study | [`inference_Trp-cage.sh`](./code/ViSNet-PIMA_train_and_test_on_Trp/inference_Trp-cage.sh) | `results/log_learning_curve_and_ablation_studys/*/inference_results.pt` |
 | 4 | NCI Atlas | [`inference_NCIA.sh`](./code/ViSNet-PIMA_test_on_NCIA/inference_NCIA.sh) | `results/log_NCIA/ncia_binding_visnet-pima.csv` |
-| 5 | Simulation | [`run.sh`](./code/AI2BMD-PIMA_simulation/run.sh) | `code/AI2BMD-PIMA_simulation/Logs-1_rep_chig.c0/SimulationResults/*` |
+| 5 | Simulation | [`simulation.sh`](./code/AI2BMD-PIMA_simulation/simulation.sh) | `code/AI2BMD-PIMA_simulation/Logs-1_rep_chig.c0/SimulationResults/*` |
 
 All terminal output produced by the unified workflow is also saved to:
 
 ```text
-results/*
+results/show_results_tables/*.csv
+```
+
+and
+
+```text
+results/output.log
 ```
 
 ### MD22 evaluation order
@@ -144,13 +147,13 @@ The summary contains the AIMD-Chig results, all seven MD22 subsets, the six Trp-
 
 ### 6. Simulation and calculation with AI<sup>2</sup>BMD-PIMA
 
-We provide scripts for running molecular dynamics simulations and evaluating multi-frame PDB trajectories with AI<sup>2</sup>BMD-PIMA. Run the following commands from the repository root:
+We provide scripts for running molecular dynamics simulation with AI<sup>2</sup>BMD-PIMA (demo protein is Chignolin). Run the following commands from the repository root:
 
 ```bash
-bash code/AI2BMD-PIMA_simulation/run.sh
+bash code/AI2BMD-PIMA_simulation/simulation.sh
 ```
 
-The animation below shows a representative molecular dynamics trajectory generated with the AI<sup>2</sup>BMD-PIMA simulation workflow.
+The animation below shows a Trp-cage molecular dynamics trajectory (solvent omitted) generated with the AI<sup>2</sup>BMD-PIMA simulation workflow.
 
 <p align="center">
   <img src="./code/trajectory.gif" alt="AI2BMD-PIMA molecular dynamics trajectory" width="800">
@@ -174,15 +177,15 @@ Example training configuration files for the other datasets are provided in [`ex
 
 ### MD22
 
-To train ViSNet-PIMA on MD22, run:
+To train ViSNet-PIMA on any subset of MD22, run:
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python code/ViSNet-PIMA_test_on_Chig_and_MD22/train.py \
-  --conf code/ViSNet-PIMA_test_on_Chig_and_MD22/examples_MD22_AIMD-Chig/ViSNet-MD22-Ac_Ala3_NHMe.yml \
+  --conf code/ViSNet-PIMA_test_on_Chig_and_MD22/examples_MD22_AIMD-Chig/ViSNet-MD22-*.yml \
   --dataset-root data/md22-dataset \
-  --log-dir results/log_MD22
+  --log-dir results/log_MD22-*
 ```
 
 ## License
 
-This project is licensed under the terms of the MIT license.
+This project is licensed under the terms of the `MIT License`.
