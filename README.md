@@ -18,7 +18,7 @@ ViSNet-PIMA (short for “**ViSNet** with **P**hysics-**I**nformed **M**ultipole
 
 <img src="./code/PIMA_arch.png" alt="ViSNet-PIMA architecture" width="100%">
 
-AI<sup>2<sup>BMD-PIMA integrates ViSNet-PIMA into protein simulations through a three-stage "Transfer Learning--Pretraining--Finetuning" strategy. It transfers local fragment representations, pretrains non-local interactions on molecular mechanics (MM) data, and finetunes with limited DFT labels, enabling accurate inter-fragment energy and force predictions at substantially reduced computational and data costs for biomolecular simulations.
+AI<sup>2</sup>BMD-PIMA integrates ViSNet-PIMA into protein simulations through a three-stage "Transfer Learning--Pretraining--Finetuning" strategy. It transfers local fragment representations, pretrains non-local interactions on molecular mechanics (MM) data, and finetunes with limited DFT labels, enabling accurate inter-fragment energy and force predictions at substantially reduced computational and data costs for biomolecular simulations.
 
 <img src="./code/AI2BMD-PIMA_arch.png" alt="AI2BMD-PIMA architecture" width="100%">
 
