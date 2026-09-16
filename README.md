@@ -6,6 +6,12 @@
   Enhancing long-range interaction modeling for ab initio biomolecular calculation with ViSNet-PIMA
 </h1>
 
+<p align="center">
+  <a><img src="https://img.shields.io/badge/License-MIT-green"></a>
+  <a><img src="https://img.shields.io/github/last-commit/WangGroup-AI/AI2BMD"></a>
+  <a><img src="https://img.shields.io/badge/Python-3.10-red"></a>
+</p> 
+
 ## Overview
 
 ViSNet-PIMA (short for “**ViSNet** with **P**hysics-**I**nformed **M**ultipole **A**ggregator”) combines multipole expansion theory with ViSNet to accurately model both short-range and long-range molecular interactions, outperforming state-of-the-art MLFFs in energy and force predictions.
@@ -24,7 +30,7 @@ bash ./run_all.sh
 
 This command sequentially runs all evaluation tasks and displays the consolidated results.
 
-These experimental are also saved in the `/results` folder. Meanwhile, the generated simulation trajectories are saved in `code/AI2BMD-PIMA_simulation/Logs-1_rep_chig.c0/SimulationResults/*`.
+These experimental are also saved in the `results` folder. Meanwhile, the generated simulation trajectories are saved in `code/AI2BMD-PIMA_simulation/Logs-1_rep_chig.c0/SimulationResults/*`.
 
 ## Environments
 
@@ -34,7 +40,7 @@ Clone this repository and enter its root directory.
 
 ### 2. Create the Conda environment
 
-The complete environment used by the unified reproduction workflow is specified in [`environment.yml`](./code/ViSNet-PIMA-final/environment.yml). From the repository root, run:
+The complete environment used by the unified reproduction workflow is specified in [`environment.yml`](./code/ViSNet-PIMA_test_on_Chig_and_MD22/environment.yml). From the repository root, run:
 
 ```bash
 conda env create --file code/ViSNet-PIMA-final/environment.yml
@@ -63,9 +69,9 @@ The master script executes the following stages in order:
 
 | Order | Evaluation | Entry point | Primary output |
 |:---:|---|---|---|
-| 1 | AIMD-Chig | [`inference_Chig.sh`](./code/ViSNet-PIMA-final/inference_Chig.sh) | `results/log_Chig/inference_results.pt` |
-| 2 | MD22 | [`inference_MD22.sh`](./code/ViSNet-PIMA-final/inference_MD22.sh) | `results/log_md22_*/inference_results.pt` |
-| 3 | Trp-cage learning curve and ablation study | [`inference_Trp-cage.sh`](./code/AI2BMD-PIMA/inference_Trp-cage.sh) | `results/log_learning_curve_and_ablation_studys/*/inference_results.pt` |
+| 1 | AIMD-Chig | [`inference_Chig.sh`](./code/ViSNet-PIMA_test_on_Chig_and_MD22/inference_Chig.sh) | `results/log_Chig/inference_results.pt` |
+| 2 | MD22 | [`inference_MD22.sh`](./code/ViSNet-PIMA_test_on_Chig_and_MD22/inference_MD22.sh) | `results/log_md22_*/inference_results.pt` |
+| 3 | Trp-cage learning curve and ablation study | [`inference_Trp-cage.sh`](./code/ViSNet-PIMA_train_and_test_on_Trp/inference_Trp-cage.sh) | `results/log_learning_curve_and_ablation_studys/*/inference_results.pt` |
 | 4 | NCI Atlas | [`inference_NCIA.sh`](./code/ViSNet-PIMA_test_on_NCIA/inference_NCIA.sh) | `results/log_NCIA/ncia_binding_visnet-pima.csv` |
 
 All terminal output produced by the unified workflow is also saved to:
@@ -164,7 +170,7 @@ CUDA_VISIBLE_DEVICES=0 python code/ViSNet-PIMA-final/train.py \
   --log-dir results/log_Chig
 ```
 
-Example training configuration files for the other datasets are provided in [`examples_MD22_AIMD-Chig`](./code/ViSNet-PIMA-final/examples_MD22_AIMD-Chig/) and can be used in the same way.
+Example training configuration files for the other datasets are provided in [`examples_MD22_AIMD-Chig`](./code/ViSNet-PIMA_test_on_Chig_and_MD22/examples_MD22_AIMD-Chig/) and can be used in the same way.
 
 ### MD22
 
@@ -176,12 +182,6 @@ CUDA_VISIBLE_DEVICES=0 python code/ViSNet-PIMA-final/train.py \
   --dataset-root data/md22-dataset \
   --log-dir results/log_MD22
 ```
-
-## Demo Notebook
-
-The demonstration notebook provides the complete process for reproducing the energy and force experiments:
-
-[`ViSNet-PIMA-final/Examples_Energy&Force.ipynb`](./code/ViSNet-PIMA-final/Examples_Energy%26Force.ipynb)
 
 ## License
 
