@@ -15,7 +15,7 @@
 ## Wechat Group
 Join our official user group to get support, track our latest updates, and connect with other users!
 <p align="center">
-  <img src="./docs/Group_QR_Code.png" alt="Wechat Group" width="30%" />
+  <img src="./docs/Group_QR_Code.jpg" alt="Wechat Group" width="30%" />
 </p>
 
 ## Get Started
