@@ -24,7 +24,7 @@ AI2BMD-PIMA integrates ViSNet-PIMA into protein simulations through a three-stag
 
 ## 🌟 Quick Start
 
-### **We have provided a Jupyter Notebook named `run_all.ipynb`. Users can click the `Run All` button to reproduce all the results.**
+### **We have provided a Jupyter Notebook named [`run_all.ipynb`](./run_all.ipynb). Users can click the `Run All` button to reproduce all the results.**
 
 ![Button](./code/button.png)
 
@@ -36,7 +36,7 @@ bash ./run_all.sh
 
 This command sequentially runs all evaluation tasks and displays the consolidated results.
 
-These experimental results are also saved in the `results` folder. Meanwhile, the generated simulation trajectories are saved in `code/AI2BMD-PIMA_simulation/Logs-1_rep_chig.c0/SimulationResults/*`, including the `.traj` and `.pdb` files.
+These experimental results are also saved in the [`results`](./results) folder. Meanwhile, the generated simulation trajectories are saved in [`code/AI2BMD-PIMA_simulation/Logs-1_rep_chig.c0/SimulationResults/*`](./code/AI2BMD-PIMA_simulation/Logs-1_rep_chig.c0/SimulationResults), including the [`.traj`](./code/AI2BMD-PIMA_simulation/Logs-1_rep_chig.c0/SimulationResults/1_rep_chig.c0-traj.traj) and [`.pdb`](./code/AI2BMD-PIMA_simulation/Logs-1_rep_chig.c0/SimulationResults/1_rep_chig.c0-traj.pdb) files.
 
 ## Environments
 
@@ -74,19 +74,11 @@ The master script executes the following stages in order:
 
 All terminal output produced by the unified workflow is also saved to:
 
-```text
-results/show_results_tables/*.csv
-```
-
-and
-
-```text
-results/output.log
-```
+[`results/show_results_tables/*.csv`](./results/show_results_tables) and [`results/output.log`](./results/output.log)
 
 ### MD22 evaluation order
 
-The seven MD22 subsets are evaluated in the following order, matching `inference_MD22.sh`:
+The seven MD22 subsets are evaluated in the following order, matching [`inference_MD22.sh`](./code/ViSNet-PIMA_test_on_Chig_and_MD22/inference_MD22.sh):
 
 1. Ac-Ala3-NHMe
 2. DHA
@@ -98,7 +90,7 @@ The seven MD22 subsets are evaluated in the following order, matching `inference
 
 ### Trp-cage evaluation order
 
-The learning-curve and ablation models are evaluated in the following order, matching `inference_Trp-cage.sh`:
+The learning-curve and ablation models are evaluated in the following order, matching [`inference_Trp-cage.sh`](./code/ViSNet-PIMA_train_and_test_on_Trp/inference_Trp-cage.sh):
 
 1. 20% finetuned with pretraining
 2. 40% finetuned with pretraining
@@ -188,4 +180,4 @@ CUDA_VISIBLE_DEVICES=0 python code/ViSNet-PIMA_test_on_Chig_and_MD22/train.py \
 
 ## License
 
-This project is licensed under the terms of the `MIT License`.
+This project is licensed under the terms of the [`MIT License`](./LICENSE).
