@@ -27,8 +27,8 @@ batch_size: 4
 inference_batch_size: 4
 standardize: true
 splits: null
-train_size: 950
-val_size: 50
+train_size: null
+val_size: null
 test_size: null
 num_workers: 12
 

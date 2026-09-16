@@ -3,7 +3,7 @@ load_model: null
 # training settings
 num_epochs: 10000
 lr_warmup_steps: 1000
-lr: 0.00008
+lr: 0.0002
 lr_patience: 30
 lr_min: 1.e-07
 lr_factor: 0.8
@@ -27,8 +27,8 @@ batch_size: 1
 inference_batch_size: 1
 standardize: true
 splits: null
-train_size: 950
-val_size: 50
+train_size: null
+val_size: null
 test_size: null
 num_workers: 12
 

@@ -3,7 +3,7 @@ load_model: null
 # training settings
 num_epochs: 100000
 lr_warmup_steps: 1000
-lr: 0.00002
+lr: 0.0004
 lr_patience: 30
 lr_min: 1.e-07
 lr_factor: 0.8
@@ -12,8 +12,8 @@ early_stopping_patience: 600
 loss_type: MSE
 loss_scale_y: 0.05
 loss_scale_dy: 1.0
-energy_weight: 0.5
-force_weight: 0.5
+energy_weight: 0.05
+force_weight: 0.95
 
 # dataset specific
 dataset: MD22
@@ -27,8 +27,8 @@ batch_size: 4
 inference_batch_size: 4
 standardize: true
 splits: null
-train_size: 950
-val_size: 50
+train_size: null
+val_size: null
 test_size: null
 num_workers: 12
 

@@ -20,14 +20,13 @@ dataset: Chignolin
 dataset_arg: null
 dataset_root: ../../../data/AIMD-Chig
 derivative: true
-split_mode: null
 
 # dataloader specific
 reload: 1
 batch_size: 4
 inference_batch_size: 4
 standardize: false
-splits: /home/sunxin/GITHUB_MAINTAIN/ViSNet-PIMA/code/ViSNet-PIMA-final/examples_MD22_AIMD-Chig/Chignolin_splits.npz
+splits: null
 train_size: 0.8
 val_size: 0.1
 test_size: null
@@ -39,7 +38,7 @@ output_model: Scalar
 prior_model: Atomref
 
 # architectural specific
-embedding_dimension: 256
+embedding_dimension: 128
 num_layers: 6
 num_rbf: 32
 activation: silu

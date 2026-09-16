@@ -73,6 +73,7 @@ The master script executes the following stages in order:
 | 2 | MD22 | [`inference_MD22.sh`](./code/ViSNet-PIMA_test_on_Chig_and_MD22/inference_MD22.sh) | `results/log_md22_*/inference_results.pt` |
 | 3 | Trp-cage learning curve and ablation study | [`inference_Trp-cage.sh`](./code/ViSNet-PIMA_train_and_test_on_Trp/inference_Trp-cage.sh) | `results/log_learning_curve_and_ablation_studys/*/inference_results.pt` |
 | 4 | NCI Atlas | [`inference_NCIA.sh`](./code/ViSNet-PIMA_test_on_NCIA/inference_NCIA.sh) | `results/log_NCIA/ncia_binding_visnet-pima.csv` |
+| 5 | Simulation | [`run.sh`](./code/AI2BMD-PIMA_simulation/run.sh) | `code/AI2BMD-PIMA_simulation/Logs-1_rep_chig.c0/SimulationResults/*` |
 
 All terminal output produced by the unified workflow is also saved to:
 
