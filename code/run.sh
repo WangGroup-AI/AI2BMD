@@ -12,7 +12,7 @@ cd "${SCRIPT_DIR}/ViSNet-PIMA_test_on_Chig_and_MD22"
 bash inference_Chig.sh "$@"
 bash inference_MD22.sh "$@"
 
-cd "${SCRIPT_DIR}/ViSNet-PIMA_train_and_test_on_Trp"
+cd "${SCRIPT_DIR}/AI2BMD-PIMA_train"
 bash inference_Trp-cage.sh "$@"
 
 cd "${SCRIPT_DIR}/ViSNet-PIMA_test_on_NCIA"
