@@ -24,14 +24,14 @@ AI<sup>2</sup>BMD-PIMA integrates ViSNet-PIMA into AI<sup>2</sup>BMD through a "
 
 ## 🌟 Quick Start
 
-### **We have provided a Jupyter Notebook named [`run_all.ipynb`](./run_all.ipynb). Users can click the `Run All` button to reproduce all the results.**
+### **We have provided a Jupyter Notebook named [`run_all.ipynb`](./run_all.ipynb). Users can click the `Retart the kernel and run all cells` button to reproduce all the results.**
 
 ![Button](./code/button.png)
 
 Users can also open a terminal and run:
 
 ```bash
-bash ./run_all.sh
+bash ./code/run_all.sh
 ```
 
 This command sequentially runs all evaluation tasks and displays the consolidated results.
@@ -44,7 +44,7 @@ These experimental results are also saved in the [`results`](./results) folder. 
 
 Our environment is based on Docker, and the conda environment `PIMA` will be activated automatically for running.
 
-The environment uses `Python 3.11`, `PyTorch 2.8.0` with `CUDA 12.8`, and the corresponding `PyTorch Lightning` and `PyTorch Geometric` extensions, as well as `jax[cuda12] 0.4.33`.
+The environment uses `Python 3.11`, `PyTorch 2.8.0` with `CUDA 12.8`, and the corresponding `PyTorch Lightning 2.6.6` and `PyTorch Geometric 2.8.0` extensions, as well as `mlip 0.1.2` and `jax[cuda12] 0.4.33`.
 
 ### 2. Activate the Conda environment (optional)
 
@@ -59,7 +59,7 @@ conda activate PIMA
 Run the complete workflow with the following command:
 
 ```bash
-bash ./run_all.sh
+bash ./code/run_all.sh
 ```
 
 The master script executes the following stages in order:
