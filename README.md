@@ -40,19 +40,9 @@ These experimental results are also saved in the [`results`](./results) folder. 
 
 ## Environments
 
-### 1. Introduction
-
-Our environment is based on Docker, and the conda environment `PIMA` will be activated automatically for running.
+Our environment is based on Docker, and all required environment variables have been configured.
 
 The environment uses `Python 3.11`, `PyTorch 2.8.0` with `CUDA 12.8`, and the corresponding `PyTorch Lightning 2.6.6` and `PyTorch Geometric 2.8.0` extensions, as well as `mlip 0.1.2` and `jax[cuda12] 0.4.33`.
-
-### 2. Activate the Conda environment (optional)
-
-From the repository root, run:
-
-```bash
-conda activate PIMA
-```
 
 ## Reproduction Workflow
 
