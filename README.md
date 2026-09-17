@@ -129,7 +129,7 @@ The summary contains the AIMD-Chig results, all seven MD22 subsets, the six Trp-
 
 ### 6. Simulation and calculation with AI<sup>2</sup>BMD-PIMA
 
-We provide scripts for running molecular dynamics simulation with AI<sup>2</sup>BMD-PIMA (demo protein is Chignolin). Run the following commands from the repository root:
+We provide scripts for running molecular dynamics simulation with AI<sup>2</sup>BMD-PIMA (demo protein is Trp-cage). Run the following commands from the repository root:
 
 ```bash
 bash code/AI2BMD-PIMA_simulation/simulation.sh
