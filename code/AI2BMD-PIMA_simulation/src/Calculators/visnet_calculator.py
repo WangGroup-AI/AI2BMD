@@ -215,6 +215,7 @@ if __name__ == "__main__":
 
 ViSNetModelLike = Union[ViSNetModel, ViSNetAsyncModel]
 _local_calc: dict[str, ViSNetModel] = {}
+_async_calc: dict[str, ViSNetModel] = {}
 
 def get_visnet_model(model_path: str, ckpt_type: str, device: str):
     # return ViSNetAsyncCalculator(model_path, ckpt_type, device)
@@ -229,7 +230,11 @@ def get_visnet_model(model_path: str, ckpt_type: str, device: str):
             return _local_calc[signature]
         else:
             # do not reuse local, but create a proxy
-            return ViSNetAsyncModel(model_path, ckpt_type, device)
+            # return ViSNetAsyncModel(model_path, ckpt_type, device)
+            async_key = f"{device}-{model_path}"
+            if async_key not in _async_calc:
+                _async_calc[async_key] = ViSNetAsyncModel(model_path, ckpt_type, device)
+            return _async_calc[async_key]
     else: # doesn't exist in master, create one
         kwargs = {
             'model_path': model_path,
