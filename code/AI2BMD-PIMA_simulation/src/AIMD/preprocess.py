@@ -597,6 +597,7 @@ temp0={self.temp_k},
                 exist = {
                     os.path.join(mm_path, p)
                     for p in os.listdir(mm_path)
+                    if not p.startswith(".")
                 }
                 expect = {
                     preeq_pdb,
