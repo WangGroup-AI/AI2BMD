@@ -96,8 +96,6 @@ def load_ncia(path):
             rows.append(
                 {
                     "Subset": row["subset"],
-                    "Evaluated": int(row["evaluated"]),
-                    "Skipped": int(row["skipped"]),
                     "MAE (kcal/mol)": float(row["mae"]),
                     "RMSE (kcal/mol)": float(row["rmse"]),
                 }

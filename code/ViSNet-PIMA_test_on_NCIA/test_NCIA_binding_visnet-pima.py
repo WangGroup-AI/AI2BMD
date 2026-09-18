@@ -114,8 +114,6 @@ def evaluate_file(path, force_field):
         allowed_selection(frame, sel_a) and allowed_selection(frame, sel_b)
         for frame, sel_a, sel_b in zip(frames, selections_a, selections_b)
     ]
-    skipped = sum(not ok for ok in keep)
-
     frames = [frame for frame, ok in zip(frames, keep) if ok]
     metadata = [data for data, ok in zip(metadata, keep) if ok]
     selections_a = [sel for sel, ok in zip(selections_a, keep) if ok]
@@ -123,7 +121,7 @@ def evaluate_file(path, force_field):
     refs = np.array([float(data["benchmark_Eint"]) for data in metadata])
 
     if not frames:
-        return np.array([]), skipped
+        return np.array([])
 
     frames_a = [frame[sel] for frame, sel in zip(frames, selections_a)]
     frames_b = [frame[sel] for frame, sel in zip(frames, selections_b)]
@@ -138,7 +136,7 @@ def evaluate_file(path, force_field):
     pred_binding = (e_total - e_a - e_b) * EV_TO_KCAL
     errors = pred_binding - refs
 
-    return errors, skipped
+    return errors
 
 
 def subset_name(path):
@@ -146,20 +144,16 @@ def subset_name(path):
     return name[5:] if name.startswith("NCIA_") else name
 
 
-def metric_row(name, errors, skipped):
+def metric_row(name, errors):
     if len(errors) == 0:
         return {
             "subset": name,
-            "evaluated": 0,
-            "skipped": skipped,
             "mae": "",
             "rmse": "",
         }
 
     return {
         "subset": name,
-        "evaluated": len(errors),
-        "skipped": skipped,
         "mae": float(np.mean(np.abs(errors))),
         "rmse": float(np.sqrt(np.mean(errors ** 2))),
     }
@@ -177,32 +171,30 @@ def main():
     rows = []
     for path in sorted(EXTXYZ_DIR.glob("*.xyz")):
         print(f"Processing {path.name}")
-        errors, skipped = evaluate_file(path, force_field)
+        errors = evaluate_file(path, force_field)
         all_errors.extend(errors)
-        row = metric_row(subset_name(path), errors, skipped)
+        row = metric_row(subset_name(path), errors)
         rows.append(row)
 
-        if row["evaluated"]:
+        if len(errors):
             print(
-                f"  evaluated={row['evaluated']}, skipped={row['skipped']}, "
                 f"MAE={row['mae']:.6f}, RMSE={row['rmse']:.6f} kcal/mol"
             )
         else:
-            print(f"  evaluated=0, skipped={skipped}")
+            print("  No frames to evaluate.")
 
     all_errors = np.array(all_errors)
     if len(all_errors):
-        total_row = metric_row("weighted_total", all_errors, sum(row["skipped"] for row in rows))
+        total_row = metric_row("weighted_total", all_errors)
         rows.append(total_row)
         print(
-            f"Overall: evaluated={total_row['evaluated']}, skipped={total_row['skipped']}, "
-            f"MAE={total_row['mae']:.6f}, RMSE={total_row['rmse']:.6f} kcal/mol"
+            f"Overall: MAE={total_row['mae']:.6f}, RMSE={total_row['rmse']:.6f} kcal/mol"
         )
     else:
         print("No frames to evaluate.")
 
     with open(OUTPUT_CSV, "w", newline="", encoding="utf-8") as f:
-        fieldnames = ["subset", "evaluated", "skipped", "mae", "rmse"]
+        fieldnames = ["subset", "mae", "rmse"]
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(
