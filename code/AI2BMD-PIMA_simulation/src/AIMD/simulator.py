@@ -216,7 +216,7 @@ class BaseSimulator(ABC):
             print("Start pre-equilibration")
             for restraint in restraints:
                 print(
-                    f"Pre-equilibration with {restraint} eV/A² for {self.preeq_steps} steps"
+                    f"Pre-equilibration with {restraint} kcal/mol/A² for {self.preeq_steps} steps"
                 )
                 constraints = []
                 ref_positions = self.prot.positions
